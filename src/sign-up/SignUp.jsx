@@ -16,7 +16,12 @@ import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { GoogleIcon } from "./components/CustomIcons";
 import { auth, googleProvider } from "../firebaseConfig";
-import { signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import {
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  createUserWithEmailAndPassword
+} from "firebase/auth";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -76,7 +81,6 @@ export default function SignUp(props) {
   const [otp, setOtp] = React.useState("");
   const [otpSent, setOtpSent] = React.useState(false);
   const [useOtp, setUseOtp] = React.useState(false);
-  
 
   const toggleAuthMethod = () => {
     setUseOtp((prev) => !prev);
@@ -94,67 +98,6 @@ export default function SignUp(props) {
     }
   };
 
-  const validateInputs = () => {
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-    const name = document.getElementById("name");
-    const phone = document.getElementById("phone");
-
-    let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage("Please enter a valid email address.");
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage("");
-    }
-
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
-    }
-
-    if (!name.value || name.value.length < 1) {
-      setNameError(true);
-      setNameErrorMessage("Name is required.");
-      isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage("");
-    }
-
-    if (!phone.value || phone.value.length < 1) {
-      setPhoneError(true);
-      setPhoneErrorMessage("Phone Number is required.");
-      isValid = false;
-    } else {
-      setPhoneError(false);
-      setPhoneErrorMessage("");
-    }
-
-    return isValid;
-  };
-
-  const handleSubmit = (event) => {
-    if (nameError || emailError || passwordError || phoneError) {
-      event.preventDefault();
-      return;
-    }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get("name"),
-      lastName: data.get("lastName"),
-      email: data.get("email"),
-      password: data.get("password"),
-      phone: data.get("phone"),
-    });
-  };
   const [error, setError] = React.useState(null);
 
   const handleGoogleSignIn = async () => {
@@ -174,14 +117,19 @@ export default function SignUp(props) {
       setError(error.message);
     }
   };
+
   const handleSendOtp = async () => {
     try {
+      const formattedPhoneNumber = `+${phoneNumber.replace(/\D/g, "")}`;
+      console.log("Sending OTP to:", formattedPhoneNumber);
       const result = await signInWithPhoneNumber(
         auth,
-        phoneNumber
+        formattedPhoneNumber,
+        appVerifier
       );
+      setConfirmationResult(result);
       setOtpSent(true);
-      console.log("OTP sent to", phoneNumber);
+      console.log("OTP sent to", formattedPhoneNumber);
     } catch (error) {
       console.error("Error sending OTP:", error);
       setError(error.message);
@@ -190,6 +138,7 @@ export default function SignUp(props) {
 
   const handleVerifyOtp = async () => {
     try {
+      console.log("Verifying OTP:", otp);
       const result = await confirmationResult.confirm(otp);
       const user = result.user;
       console.log("User details:", user);
@@ -205,6 +154,38 @@ export default function SignUp(props) {
     }
   };
 
+  const handleEmailSignUp = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    try {
+      console.log("Signing up with email:", email);
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = result.user;
+
+      console.log("User details:", user);
+
+      const userData = {
+        displayName: name,
+        email: user.email,
+        uid: user.uid,
+      };
+
+      navigate("/dashboard", { state: { user: userData } });
+    } catch (error) {
+      console.error("Error during email sign-up:", error);
+      setError(error.message);
+    }
+  };
+
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
@@ -218,136 +199,130 @@ export default function SignUp(props) {
           >
             Sign up
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          >
-            {!useOtp && (
-              <>
+          {!useOtp ? (
+            <Box
+              component="form"
+              onSubmit={handleEmailSignUp}
+              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            >
+              <FormControl>
+                <FormLabel htmlFor="name">Full name</FormLabel>
+                <TextField
+                  autoComplete="name"
+                  name="name"
+                  required
+                  fullWidth
+                  id="name"
+                  placeholder="Jon Snow"
+                  error={nameError}
+                  helperText={nameErrorMessage}
+                  color={nameError ? "error" : "primary"}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel htmlFor="email">Email</FormLabel>
+                <TextField
+                  required
+                  fullWidth
+                  id="email"
+                  placeholder="your@email.com"
+                  name="email"
+                  autoComplete="email"
+                  variant="outlined"
+                  error={emailError}
+                  helperText={emailErrorMessage}
+                  color={emailError ? "error" : "primary"}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel htmlFor="password">Password</FormLabel>
+                <TextField
+                  required
+                  fullWidth
+                  name="password"
+                  placeholder="••••••"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                  variant="outlined"
+                  error={passwordError}
+                  helperText={passwordErrorMessage}
+                  color={passwordError ? "error" : "primary"}
+                />
+              </FormControl>
+              <Button type="submit" fullWidth variant="contained">
+                Sign up
+              </Button>
+            </Box>
+          ) : (
+            <>
+              <FormControl>
+                <FormLabel htmlFor="name">Full name</FormLabel>
+                <TextField
+                  autoComplete="name"
+                  name="name"
+                  required
+                  fullWidth
+                  id="name"
+                  placeholder="Jon Snow"
+                  error={nameError}
+                  helperText={nameErrorMessage}
+                  color={nameError ? "error" : "primary"}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel htmlFor="phone">Phone No</FormLabel>
+                <TextField
+                  required
+                  fullWidth
+                  id="phone"
+                  name="phone"
+                  placeholder="1234567890"
+                  error={phoneError}
+                  helperText={phoneErrorMessage}
+                />
+              </FormControl>
+              {otpSent && (
                 <FormControl>
-                  <FormLabel htmlFor="name">Full name</FormLabel>
+                  <FormLabel htmlFor="otp">OTP</FormLabel>
                   <TextField
-                    autoComplete="name"
-                    name="name"
                     required
                     fullWidth
-                    id="name"
-                    placeholder="Jon Snow"
-                    error={nameError}
-                    helperText={nameErrorMessage}
-                    color={nameError ? "error" : "primary"}
+                    id="otp"
+                    placeholder="123456"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
                   />
                 </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    placeholder="your@email.com"
-                    name="email"
-                    autoComplete="email"
-                    variant="outlined"
-                    error={emailError}
-                    helperText={emailErrorMessage}
-                    color={emailError ? "error" : "primary"}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    placeholder="••••••"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    variant="outlined"
-                    error={passwordError}
-                    helperText={passwordErrorMessage}
-                    color={passwordError ? "error" : "primary"}
-                  />
-                </FormControl>
+              )}
+              {!otpSent ? (
                 <Button
-                  type="submit"
                   fullWidth
                   variant="contained"
-                  onClick={validateInputs}
+                  sx={{ mt: 3 }}
+                  onClick={() => {
+                    if (validatePhoneInputs()) handleSendOtp();
+                  }}
                 >
-                  Sign up
+                  Send OTP
                 </Button>
-              </>
-            )}
-            {useOtp && (
-              <>
-                <FormControl>
-                  <FormLabel htmlFor="name">Full name</FormLabel>
-                  <TextField
-                    autoComplete="name"
-                    name="name"
-                    required
-                    fullWidth
-                    id="name"
-                    placeholder="Jon Snow"
-                    error={nameError}
-                    helperText={nameErrorMessage}
-                    color={nameError ? "error" : "primary"}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="phone">Phone No</FormLabel>
-                  <TextField
-                    required
-                    fullWidth
-                    id="phone"
-                    name="phone"
-                    placeholder="1234567890"
-                    error={phoneError}
-                    helperText={phoneErrorMessage}
-                  />
-                </FormControl>
-                {otpSent && (
-                  <FormControl>
-                    <FormLabel htmlFor="otp">OTP</FormLabel>
-                    <TextField
-                      required
-                      fullWidth
-                      id="otp"
-                      placeholder="123456"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                    />
-                  </FormControl>
-                )}
-                {!otpSent ? (
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3 }}
-                    onClick={handleSendOtp}
-                  >
-                    Send OTP
-                  </Button>
-                ) : (
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3 }}
-                    onClick={handleVerifyOtp}
-                  >
-                    Verify OTP
-                  </Button>
-                )}
-                {error && (
-                  <Typography color="error" sx={{ mt: 2 }}>
-                    {error}
-                  </Typography>
-                )}
-              </>
-            )}
-          </Box>
+              ) : (
+                <Button
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3 }}
+                  onClick={handleVerifyOtp}
+                >
+                  Verify OTP
+                </Button>
+              )}
+              {error && (
+                <Typography color="error" sx={{ mt: 2 }}>
+                  {error}
+                </Typography>
+              )}
+            </>
+          )}
           <Button variant="text" onClick={toggleAuthMethod}>
             {useOtp ? "Use Email & Password" : "Use Phone No"}
           </Button>

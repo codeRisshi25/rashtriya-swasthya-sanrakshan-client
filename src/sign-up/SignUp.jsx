@@ -20,7 +20,7 @@ import {
   signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -161,6 +161,10 @@ export default function SignUp(props) {
     const email = formData.get("email");
     const password = formData.get("password");
 
+    if (!validateEmailInputs(name, email, password)) {
+      return;
+    }
+
     try {
       console.log("Signing up with email:", email);
       const result = await createUserWithEmailAndPassword(
@@ -180,11 +184,46 @@ export default function SignUp(props) {
 
       navigate("/dashboard", { state: { user: userData } });
     } catch (error) {
-      console.error("Error during email sign-up:", error);
-      setError(error.message);
+      if (error.code == "auth/email-already-in-use") {
+        setError("Email already in use. Please sign in instead.");
+      } else {
+        console.error("Error during email sign-up:", error);
+        setError(error.message);
+      }
     }
   };
 
+  const validateEmailInputs = (name, email, pass) => {
+    let isValid = true;
+    if (!name) {
+      setNameError(true);
+      setNameErrorMessage("Please enter your full name.");
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage("");
+    }
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setEmailError(true);
+      setEmailErrorMessage("Please enter a valid email address.");
+      isValid = false;
+    } else {
+      setEmailError(false);
+      setEmailErrorMessage("");
+    }
+
+    if (!pass || pass.length < 6) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      isValid = false;
+    } else {
+      setPasswordError(false);
+      setPasswordErrorMessage("");
+    }
+
+    return isValid;
+  };
 
   return (
     <AppTheme {...props}>

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
@@ -10,27 +9,27 @@ import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 const items = [
   {
     icon: <SettingsSuggestRoundedIcon sx={{ color: 'text.secondary' }} />,
-    title: 'Adaptable performance',
+    title: 'Patient Controlled Access',
     description:
-      'Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.',
+      'Patients have full control over who can access their medical records, ensuring privacy.',
   },
   {
     icon: <ConstructionRoundedIcon sx={{ color: 'text.secondary' }} />,
-    title: 'Built to last',
+    title: 'Blockchain-Based Security',
     description:
-      'Experience unmatched durability that goes above and beyond with lasting investment.',
+      'Records are stored securely on the blockchain, ensuring immutability and preventing tampering.',
   },
   {
     icon: <ThumbUpAltRoundedIcon sx={{ color: 'text.secondary' }} />,
-    title: 'Great user experience',
+    title: 'Encrypted Data Storage',
     description:
-      'Integrate our product into your routine with an intuitive and easy-to-use interface.',
+      'Medical records are encrypted and stored off-chain, accessible only to authorized parties.',
   },
   {
     icon: <AutoFixHighRoundedIcon sx={{ color: 'text.secondary' }} />,
-    title: 'Innovative functionality',
+    title: 'Interoperability with Healthcare Systems',
     description:
-      'Stay ahead with features that set new standards, addressing your evolving needs better than the rest.',
+      'Integrates with existing EHR systems via standardized APIs for seamless data exchange.',
   },
 ];
 

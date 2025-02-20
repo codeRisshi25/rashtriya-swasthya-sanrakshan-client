@@ -1,0 +1,161 @@
+/* General Styles */
+.dashboard-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f7fc;
+  }
+  
+  /* Header */
+  .header {
+    background-color: #3f51b5 !important;
+    color: white;
+  }
+  
+  .header-title {
+    flex-grow: 1;
+    font-weight: bold;
+  }
+  
+  /* Menu Bar */
+  .menu-bar {
+    background-color: #ffffff;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Main Layout */
+  .main-layout {
+    display: flex;
+    flex-grow: 1;
+  }
+  
+  /* Left Panel */
+  .left-panel {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Profile Card */
+  .profile-card{
+    
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    display: block;
+    
+  }
+  .allergies-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    /* justify-content: center;
+    align-items: center; */
+  }
+  
+  /* Avatar */
+  .custom-avatar {
+    width: 170px !important;
+    height: 170px !important;
+    border: 3px solid #3f51b5;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* justify-content: center;  */
+    /* align-items: center ; */
+    margin-left: auto;
+  margin-right: auto;
+  }
+  
+  /* Details */
+  .details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  /* Detail Box */
+  .detail-box {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .detail-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .detail-value {
+    font-size: 13px;
+    font-weight: bold;
+    color: gray;
+  }
+  
+  /* Right Panel */
+  .right-panel {
+    width: 75%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px;
+  }
+  
+  .dashboard-title {
+    font-weight: bold;
+    padding-bottom: 20px;
+    font-size: 20px;
+
+  }
+  
+  /* Sign Out Button */
+  .signout-button {
+    margin-top: 20px !important;
+    padding: 10px 20px;
+    background-color: #3f51b5 !important;
+    color: white !important;
+    font-weight: bold;
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .signout-button:hover {
+    background-color: #a0a5c5 !important;
+  }
+  
+  /* Allergies Card */
+  .allergies-card {
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 1024px) {
+    .main-layout {
+      flex-direction: column;
+    }
+    .left-panel {
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-around;
+    }
+    .right-panel {
+      width: 100%;
+    }
+  }
+
+  
+  

@@ -1,0 +1,44 @@
+/* General Styles */
+.dashboard-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f7fc;
+}
+
+/* Header */
+.header {
+  background-color: #3f51b5 !important;
+  color: white;
+}
+
+.header-title {
+  flex-grow: 1;
+  font-weight: bold;
+}
+
+/* Menu Bar */
+.menu-bar {
+  background-color: #ffffff;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Layout */
+.main-layout {
+  display: flex;
+  flex-grow: 1;
+}
+
+/* Left Panel */
+.left-panel {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Profile Card */

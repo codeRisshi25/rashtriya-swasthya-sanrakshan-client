@@ -1,6 +1,5 @@
 import { jwtVerify, SignJWT } from "jose"
 
-// In a real application, this would be stored securely
 const secretKey = new TextEncoder().encode(process.env.JWT_SECRET || "default_secret_key_change_in_production")
 
 export async function signToken(payload: any) {
@@ -28,4 +27,3 @@ export interface User {
   email: string
   role: UserRole
 }
-

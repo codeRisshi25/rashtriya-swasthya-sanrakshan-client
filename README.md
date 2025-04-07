@@ -30,6 +30,6 @@ A blockchain-powered healthcare records management system for secure, patient-co
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/rashtriya-swasthya-sanrakshan.git
+   git clone https://github.com/codeRisshi25/rashtriya-swasthya-sanrakshan.git
    cd rashtriya-swasthya-sanrakshan
 

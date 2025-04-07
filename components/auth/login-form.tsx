@@ -50,25 +50,15 @@ export function LoginForm() {
       }
 
       const userData = await response.json();
+      console.log("User data from API:", userData);
+
 
       toast({
         title: "Login successful",
         description: "Welcome back to Rashtriya Swasthya Sanrakshan",
       });
 
-      // Use the real userData from API response instead of hardcoded values
-      // (or merge with additional data if needed)
-      const enrichedUserData = {
-        ...userData,
-        photoUrl: userData.photoUrl || "/placeholder.svg?height=100&width=100",
-        // Add any other fields that might be missing from the API response but needed in your app
-      };
-
-      // Set user data in context
-      setUser(enrichedUserData);
-
-      // Store in localStorage
-      localStorage.setItem('user', JSON.stringify(enrichedUserData));
+      setUser(userData.data);
       
       // Redirect to dashboard
       router.push("/patient/dashboard");

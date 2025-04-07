@@ -1,56 +1,74 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 
-export type UserRole = "patient" | "doctor" | "government"
-
+// Define the user type
 export interface User {
-  id?: string
+  id: string
+  name: string
+  email: string
+  role: "patient" | "doctor" | "admin"
+  photoUrl?: string
+  contact?: string
   address?: string
+  aadharId?: string
   age?: number
-  email?: string
+  currentMedications?: string
   medicalDetails?: {
     bloodGroup?: string
-    allergies?: string[]
     emergencyContact?: string
-    vaccinationHistory?: string[]
+    allergies?: string[]
   }
-  contact?: string
-  name: string
-  photoUrl?: string
-  role: UserRole
-
 }
 
 interface UserContextType {
   user: User | null
-  setUser: (user: User | null) => void
+  setUser: React.Dispatch<React.SetStateAction<User | null>>
   isLoading: boolean
   logout: () => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-export function UserProvider({ children }: { children: ReactNode }) {
+export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is logged in from localStorage or session
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
+    // Load user from localStorage on initial render
+    const loadUser = () => {
+      try {
+        const savedUser = localStorage.getItem("user")
+        if (savedUser) {
+          setUser(JSON.parse(savedUser))
+        }
+      } catch (error) {
+        console.error("Error loading user from localStorage:", error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-    setIsLoading(false)
+
+    loadUser()
   }, [])
 
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user))
+    }
+  }, [user])
+
   const logout = () => {
-    localStorage.removeItem("user")
     setUser(null)
-    // Redirect to login page would happen in the component using this function
+    localStorage.removeItem("user")
   }
 
-  return <UserContext.Provider value={{ user, setUser, isLoading, logout }}>{children}</UserContext.Provider>
+  return (
+    <UserContext.Provider value={{ user, setUser, isLoading, logout }}>
+      {children}
+    </UserContext.Provider>
+  )
 }
 
 export function useUser() {
@@ -60,4 +78,3 @@ export function useUser() {
   }
   return context
 }
-

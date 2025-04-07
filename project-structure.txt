@@ -1,0 +1,107 @@
+rashtriya-swasthya-sanrakshan/
+├── app/
+│   ├── doctor/
+│   │   ├── add-record/
+│   │   │   └── page.tsx
+│   │   ├── blockchain-logs/
+│   │   │   └── page.tsx
+│   │   ├── dashboard/
+│   │   │   └── page.tsx
+│   │   └── patients/
+│   │       └── page.tsx
+│   ├── government/
+│   │   ├── dashboard/
+│   │   │   └── page.tsx
+│   │   └── health-trends/
+│   │       └── page.tsx
+│   ├── login/
+│   │   └── page.tsx
+│   ├── onboarding/
+│   │   └── medical-history/
+│   │       └── page.tsx
+│   ├── patient/
+│   │   ├── blockchain-logs/
+│   │   │   └── page.tsx
+│   │   ├── dashboard/
+│   │   │   └── page.tsx
+│   │   ├── doctor-access/
+│   │   │   └── page.tsx
+│   │   ├── document-upload/
+│   │   │   └── page.tsx
+│   │   ├── medical-records/
+│   │   │   └── page.tsx
+│   │   └── profile/
+│   │       └── page.tsx
+│   ├── register/
+│   │   ├── page.tsx
+│   │   └── patient-details/
+│   │       └── page.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── auth/
+│   │   ├── login-form.tsx
+│   │   ├── patient-registration-form.tsx
+│   │   └── register-form.tsx
+│   ├── blockchain/
+│   │   └── transaction-log.tsx
+│   ├── doctor/
+│   │   ├── add-medical-record-form.tsx
+│   │   └── patient-list.tsx
+│   ├── gov/
+│   │   └── health-trends-dashboard.tsx
+│   ├── patient/
+│   │   ├── doctor-access-manager.tsx
+│   │   ├── document-uploader.tsx
+│   │   ├── medical-history-form.tsx
+│   │   ├── medical-records-viewer.tsx
+│   │   ├── profile-card.tsx
+│   │   └── profile-form.tsx
+│   ├── shared/
+│   │   └── dashboard-layout.tsx
+│   ├── ui/
+│   │   ├── accordion.tsx
+│   │   ├── alert-dialog.tsx
+│   │   ├── alert.tsx
+│   │   ├── avatar.tsx
+│   │   ├── badge.tsx
+│   │   ├── button.tsx
+│   │   ├── calendar.tsx
+│   │   ├── card.tsx
+│   │   ├── chart.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   ├── popover.tsx
+│   │   ├── progress.tsx
+│   │   ├── radio-group.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   ├── sidebar.tsx
+│   │   ├── table.tsx
+│   │   ├── tabs.tsx
+│   │   ├── textarea.tsx
+│   │   ├── toast.tsx
+│   │   ├── toaster.tsx
+│   │   └── use-toast.ts
+│   └── theme-provider.tsx
+├── context/
+│   └── user-context.tsx
+├── lib/
+│   ├── auth-utils.ts
+│   └── utils.ts
+├── public/
+│   └── placeholder.svg
+├── .env.local.example
+├── .eslintrc.json
+├── .gitignore
+├── next.config.mjs
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.ts
+└── tsconfig.json
+

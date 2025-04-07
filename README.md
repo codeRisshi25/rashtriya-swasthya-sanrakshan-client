@@ -1,4 +1,6 @@
 # Rashtriya Swasthya Sanrakshan
+![image](https://github.com/user-attachments/assets/773d7460-6581-46bd-931b-02a165a93984)
+
 
 A blockchain-powered healthcare records management system for secure, patient-controlled medical data.
 

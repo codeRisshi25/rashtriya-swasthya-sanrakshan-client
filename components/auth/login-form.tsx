@@ -16,6 +16,7 @@ import { useUser } from "@/context/user-context"
 import { Eye, EyeOff } from "lucide-react"
 
 export function LoginForm() {
+  
   const router = useRouter()
   const { toast } = useToast()
   const { setUser } = useUser()
@@ -33,13 +34,13 @@ export function LoginForm() {
 
     try {
       // Make API call to authentication endpoint
-      const response = await fetch('http://localhost:4505/login', {
+      const response = await fetch('http://localhost:6420/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userID,
+          userID: userID.replace(/\s+/g, ''),
           password,
           role,
         }),
@@ -79,67 +80,102 @@ export function LoginForm() {
     setIsLoading(true)
 
     const formData = new FormData(event.currentTarget)
-    const userId = formData.get("userId") as string
+    const userID = formData.get("userId") as string
     const password = formData.get("password") as string
     const userRole = formData.get("userRole") as "doctor" | "government"
 
-    // In a real app, this would call an API endpoint
     try {
-      // Mock login success
-      setTimeout(() => {
+      if (userRole === "doctor") {
+        // Make API call to authentication endpoint for doctor login
+        const response = await fetch('http://localhost:6420/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userID,
+            password,
+            role: 'doctors', // The backend expects 'doctors' for the doctor role
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Login failed');
+        }
+
+        const userData = await response.json();
+        console.log("Doctor data from API:", userData);
+        
+        // Map API response to our User interface structure
+        const doctorData = {
+          ...userData.data,
+          role: "doctor", // Ensure role is set correctly
+          // Add any additional mapping needed to match the User interface
+          full_name: userData.data.full_name || userData.data.name,
+        };
+
+        // Set user with the data from API
+        setUser(doctorData);
+        
+        // Store in localStorage for persistence
+        localStorage.setItem("user", JSON.stringify(doctorData));
+
         toast({
           title: "Login successful",
           description: "Welcome back to Rashtriya Swasthya Sanrakshan",
-        })
+        });
 
-        if (userRole === "doctor") {
-          setUser({
-            id: "DOC001",
-            name: "Dr. Rajesh Kumar",
-            email: "dr.rajesh@example.com",
-            role: "doctor",
-          })
+        router.push("/doctor/dashboard");
+      } else {
+        // Government official login
+        // Make API call to authentication endpoint for government official
+        const response = await fetch('http://localhost:6420/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userID,
+            password,
+            role: 'government', // The backend expects 'government' for admin role
+          }),
+        });
 
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              id: "DOC001",
-              name: "Dr. Rajesh Kumar",
-              email: "dr.rajesh@example.com",
-              role: "doctor",
-            }),
-          )
-
-          router.push("/doctor/dashboard")
-        } else {
-          setUser({
-            id: "GOV001",
-            name: "Ministry Official",
-            email: "official@health.gov.in",
-            role: "government",
-          })
-
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              id: "GOV001",
-              name: "Ministry Official",
-              email: "official@health.gov.in",
-              role: "government",
-            }),
-          )
-
-          router.push("/government/dashboard")
+        if (!response.ok) {
+          throw new Error('Login failed');
         }
-      }, 1500)
+
+        const userData = await response.json();
+        console.log("Government official data from API:", userData);
+        
+        // Map API response to our User interface structure
+        const adminData = {
+          ...userData.data,
+          role: "admin", // Map to 'admin' role in our app
+        };
+
+        // Set user with the data from API
+        setUser(adminData);
+        
+        // Store in localStorage for persistence
+        localStorage.setItem("user", JSON.stringify(adminData));
+
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Rashtriya Swasthya Sanrakshan",
+        });
+
+        router.push("/government/dashboard");
+      }
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Login failed",
         description: "Invalid credentials",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 

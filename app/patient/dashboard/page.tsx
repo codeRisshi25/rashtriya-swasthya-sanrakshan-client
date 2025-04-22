@@ -84,6 +84,7 @@ export default function PatientDashboard() {
             age={user.age || 0} 
             bloodType={user.medicalDetails?.bloodGroup || "Unknown"} 
             gender="Male" // This should also come from the user object
+            photoUrl={user.photoUrl}
           />
           <div className="grid gap-6 md:col-span-1 lg:col-span-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <Card>

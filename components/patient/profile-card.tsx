@@ -9,9 +9,11 @@ interface ProfileCardProps {
   age: number
   bloodType: string
   gender: string
+  photoUrl?: string
 }
 
-export function ProfileCard({ name, patientId, age, bloodType, gender }: ProfileCardProps) {
+export function ProfileCard({ name, patientId, age, bloodType, gender , photoUrl}: ProfileCardProps) {
+  const photo = `data:image/jpeg;base64,${photoUrl?.replace(/"/g, '')}`
   return (
     <Card className="border-blue-100 shadow-sm">
       <CardHeader className="pb-2 bg-blue-50 rounded-t-lg">
@@ -20,8 +22,12 @@ export function ProfileCard({ name, patientId, age, bloodType, gender }: Profile
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center">
-            <User className="h-8 w-8 text-primary" />
+          <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
+            {photoUrl ? (
+              <img src={photo} alt={`${name}'s photo`} className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-8 w-8 text-primary" />
+            )}
           </div>
           <div>
             <h3 className="font-medium">{name}</h3>

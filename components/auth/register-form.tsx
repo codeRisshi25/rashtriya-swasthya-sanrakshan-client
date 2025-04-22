@@ -34,6 +34,14 @@ export function RegisterForm() {
   const [isVerificationDialogOpen, setIsVerificationDialogOpen] = useState(false)
   const [passwordError, setPasswordError] = useState("")
   const [aadhaarError, setAadhaarError] = useState("")
+  const [referenceId, setReferenceId] = useState("")
+  const [verifyData, setVerifyData] = useState({
+    name: "",
+    gender: "",
+    dob: "",
+    address: "",
+    photoUrl: "",
+  })
 
   const validateAadhaar = (value: string) => {
     // Remove spaces for validation
@@ -79,38 +87,115 @@ export function RegisterForm() {
     }
   }
 
-  const handleAadhaarSubmit = (e: React.FormEvent) => {
+  const handleAadhaarSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateAadhaar(aadhaarId) || !validatePassword()) {
       return
     }
-    setStep("otp")
-    // In a real app, this would call an API to send OTP
-    toast({
-      title: "OTP Sent",
-      description: "A verification code has been sent to your registered mobile number",
-    })
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch('http://localhost:4505/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          aadhaarId: aadhaarId.replace(/\s/g, ""),
+          password: password
+        }),
+      });
+      
+      const data = await response.json(); //sends back the reference id
+      setReferenceId(data.reference_id);
+      
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send OTP');
+      }
+      
+      setStep("otp")
+      toast({
+        title: "OTP Sent",
+        description: "A verification code has been sent to your registered mobile number",
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send OTP",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    // In a real app, this would verify the OTP with an API
-    setTimeout(() => {
-      setIsLoading(false)
-      if (otp === "123456" || otp === "") {
-        // For demo purposes
-        setStep("verification")
-        setIsVerificationDialogOpen(true)
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Invalid OTP",
-          description: "Please enter the correct verification code",
-        })
+    try {
+      const response = await fetch('http://localhost:4505/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reference_id: referenceId,
+          otp: otp
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to verify OTP');
       }
-    }, 1500)
+
+      // Handle photo data if it exists
+      if (data.photo && data.photo.trim() !== "") {
+        // Clean any quotes from the photo string
+        const cleanPhotoUrl = data.photo.replace(/"/g, '');
+        
+        if (cleanPhotoUrl && cleanPhotoUrl.trim() !== "") {
+          // Check if it's already a data URL or http URL
+          const photoUrl = cleanPhotoUrl.startsWith('data:') || cleanPhotoUrl.startsWith('http') 
+        ? cleanPhotoUrl 
+        : `data:image/jpeg;base64,${cleanPhotoUrl}`;
+        
+          setVerifyData({
+        name: data.name,
+        gender: data.gender,
+        dob: data.dob,
+        address: data.address,
+        photoUrl: photoUrl,
+          });
+        }
+      } else {
+        setVerifyData({
+          name: data.name,
+          gender: data.gender,
+          dob: data.dob,
+          address: data.address,
+          photoUrl: "",
+        });
+      }
+      // Show verification dialog with user data from response
+      setStep("verification");
+      setIsVerificationDialogOpen(true);
+      
+      // Here you would handle the user data returned from the API
+      // For example: setUserData(data.userData);
+      
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Verification Failed",
+        description: error instanceof Error ? error.message : "Failed to verify OTP",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleVerificationConfirm = () => {
@@ -265,19 +350,23 @@ export function RegisterForm() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="flex items-start gap-4">
-                <div className="h-20 w-20 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
-                  <img
-                    src="/placeholder.svg?height=80&width=80"
-                    alt="Aadhaar Photo"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium">Rahul Sharma</h3>
-                  <p className="text-sm text-gray-500">DOB: 15/05/1978</p>
-                  <p className="text-sm text-gray-500">Gender: Male</p>
-                  <p className="text-sm text-gray-500 mt-1">123 Main Street, Mumbai, Maharashtra, 400001</p>
-                </div>
+              <div className="h-20 w-20 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
+                {verifyData.photoUrl ? (
+                <img
+                  src={verifyData.photoUrl}
+                  alt="Aadhaar Photo"
+                  className="h-full w-full object-cover"
+                />
+                ) : (
+                <div className="text-blue-500 text-xs text-center">No photo available</div>
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium">{verifyData.name}</h3>
+                <p className="text-sm text-gray-500">DOB: {verifyData.dob}</p>
+                <p className="text-sm text-gray-500">Gender: {verifyData.gender}</p>
+                <p className="text-sm text-gray-500 mt-1">{verifyData.address}</p>
+              </div>
               </div>
             </div>
             <DialogFooter>

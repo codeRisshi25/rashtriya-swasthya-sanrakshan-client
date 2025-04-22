@@ -1,16 +1,83 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { DashboardLayout } from "@/components/shared/dashboard-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Users, FileText, ClipboardList } from "lucide-react"
+import { useUser } from "@/context/user-context"
+import Image from "next/image"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 export default function DoctorDashboard() {
+  const { user, isLoading } = useUser()
+  const [isClient, setIsClient] = useState(false)
+  console.log("User:", user)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Show loading state or redirect if not a doctor
+  if (!isClient || isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>
+  }
+
+  if (!user || user.role !== "doctor") {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="mb-6">You must be logged in as a doctor to view this page.</p>
+        <Button asChild>
+          <Link href="/login">Go to Login</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  // Get doctor's first name for the greeting
+  const doctorName = user.full_name?.split(" ")[1] || "Doctor"
+  
   return (
-    <DashboardLayout userRole="doctor" userName="Dr. Rajesh Kumar">
+    <DashboardLayout userRole="doctor" userName={user.full_name || "Doctor"}>
       <div className="space-y-6">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold tracking-tight">Welcome back, Dr. Rajesh</h2>
-          <p className="text-muted-foreground">Manage your patients, add medical records, and view transaction logs</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Welcome back, Dr. {doctorName}</h2>
+            <p className="text-muted-foreground">Manage your patients, add medical records, and view transaction logs</p>
+          </div>
+          
+          {/* Doctor Profile Section */}
+          <Card className="w-full md:w-auto">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-border">
+                {user.photoUrl ? (
+                  <Image 
+                    src={user.photoUrl} 
+                    alt={user.full_name || "Doctor"} 
+                    width={64} 
+                    height={64} 
+                    className="object-cover h-full w-full"
+                  />
+                ) : (
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                      {user.full_name ? user.full_name.charAt(0) : "D"}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </div>
+              <div>
+                <p className="font-medium">{user.full_name}</p>
+                <p className="text-sm text-muted-foreground">{user.specialization}</p>
+                <p className="text-xs text-muted-foreground">{user.license_number}</p>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/doctor/profile">Edit Profile</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -129,6 +196,42 @@ export default function DoctorDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Doctor Information Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Doctor Information</CardTitle>
+            <CardDescription>Your professional details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium">Department</p>
+                <p className="text-muted-foreground">{user.department || "Not specified"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Hospital</p>
+                <p className="text-muted-foreground">{user.hospital_affiliation || "Not specified"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Experience</p>
+                <p className="text-muted-foreground">{user.years_of_experience ? `${user.years_of_experience} years` : "Not specified"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Qualifications</p>
+                <p className="text-muted-foreground">{user.qualification || "Not specified"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Contact</p>
+                <p className="text-muted-foreground">{user.contact || "Not specified"}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Email</p>
+                <p className="text-muted-foreground">{user.email || "Not specified"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   )

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
@@ -45,26 +44,56 @@ export function MedicalHistoryForm() {
     event.preventDefault()
     setIsLoading(true)
 
-    // In a real app, this would call an API endpoint to save to Firestore
     try {
-      // Mock success
-      setTimeout(() => {
-        toast({
-          title: "Medical history saved",
-          description: "Your medical history has been saved successfully",
-        })
-        router.push("/login")
-      }, 1500)
+      const formData = new FormData(event.currentTarget);
+      
+      // Extract conditions and vaccines (checkboxes)
+      const conditions = formData.getAll('conditions');
+      const vaccines = formData.getAll('vaccines');
+      
+      // Create payload from form data
+      const payload = {
+      height: formData.get('height'),
+      weight: formData.get('weight'),
+      age: formData.get('age'),
+      bloodType: formData.get('bloodType'),
+      allergiesDetails: formData.get('allergiesDetails'),
+      conditions,
+      vaccines,
+      medications: formData.get('medications'),
+      emergencyContact: formData.get('emergencyContact')
+      };
+      
+      const response = await fetch('http://localhost:4505/register_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+      throw new Error('Failed to register user');
+      }
+      
+      const data = await response.json();
+      
+      toast({
+      title: "Medical history saved",
+      description: data.message || "Your medical history has been saved successfully",
+      });
+      
+      router.push("/login");
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Failed to save",
-        description: "There was a problem saving your medical history",
-      })
+      variant: "destructive",
+      title: "Failed to save",
+      description: error instanceof Error ? error.message : "There was a problem saving your medical history",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+    }
 
   return (
     <Card className="max-w-2xl w-full shadow-lg border-blue-100">
@@ -82,13 +111,16 @@ export function MedicalHistoryForm() {
             </AlertDescription>
           </Alert>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="height">Height (cm)</Label>
               <Input
                 id="height"
                 name="height"
                 type="number"
+                min="50"
+                max="250"
+                placeholder="e.g. 170"
                 required
                 className="border-blue-200 focus-visible:ring-primary"
               />
@@ -99,6 +131,22 @@ export function MedicalHistoryForm() {
                 id="weight"
                 name="weight"
                 type="number"
+                min="1"
+                max="300"
+                placeholder="e.g. 70"
+                required
+                className="border-blue-200 focus-visible:ring-primary"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="age">Age (years)</Label>
+              <Input
+                id="age"
+                name="age"
+                type="number"
+                min="0"
+                max="120"
+                placeholder="e.g. 35"
                 required
                 className="border-blue-200 focus-visible:ring-primary"
               />
@@ -121,29 +169,15 @@ export function MedicalHistoryForm() {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Do you have any allergies?</Label>
-            <RadioGroup defaultValue="no" name="hasAllergies">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="allergies-yes" className="text-primary border-blue-200" />
-                <Label htmlFor="allergies-yes">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="allergies-no" className="text-primary border-blue-200" />
-                <Label htmlFor="allergies-no">No</Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="allergiesDetails">If yes, please specify</Label>
+            <div className="space-y-2">
+            <Label htmlFor="allergiesDetails">Allergies (if any)</Label>
             <Textarea
               id="allergiesDetails"
               name="allergiesDetails"
-              placeholder="List any allergies..."
+              placeholder="List any allergies you have..."
               className="border-blue-200 focus-visible:ring-primary"
             />
-          </div>
+            </div>
 
           <div className="space-y-3">
             <Label>Pre-existing medical conditions</Label>
@@ -188,27 +222,6 @@ export function MedicalHistoryForm() {
               className="border-blue-200 focus-visible:ring-primary"
             />
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="surgeries">Previous Surgeries</Label>
-            <Textarea
-              id="surgeries"
-              name="surgeries"
-              placeholder="List any surgeries you've had with approximate dates..."
-              className="border-blue-200 focus-visible:ring-primary"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="familyHistory">Family Medical History</Label>
-            <Textarea
-              id="familyHistory"
-              name="familyHistory"
-              placeholder="Any significant medical conditions in your immediate family..."
-              className="border-blue-200 focus-visible:ring-primary"
-            />
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="emergencyContact">Emergency Contact</Label>
             <Input

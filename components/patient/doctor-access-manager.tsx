@@ -22,7 +22,6 @@ interface Doctor {
   name: string
   specialty: string
   hospital: string
-  accessGrantedOn: Date
 }
 
 
@@ -33,7 +32,7 @@ export function DoctorAccessManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
 
-  const { user } = useUser()
+  const { user , isLoading} = useUser()
   const userWalletAddress = user?.walletAddress;
   const userId = user?.id;
 
@@ -48,6 +47,7 @@ export function DoctorAccessManager() {
         throw new Error("Failed to fetch authorized doctors")
       }
       const data = await response.json()
+      console.log("Authorized Doctors:", data.doctors)
       setAuthorizedDoctors(data.doctors)
     } catch (error) {
       toast({
@@ -59,8 +59,12 @@ export function DoctorAccessManager() {
   }
 
   useEffect(() => {
-    fetchAuthorizedDoctors()
-  }, [])
+    if (!isLoading && userId) {
+      fetchAuthorizedDoctors();
+    } else if (!isLoading && !userId) {
+      console.error("User ID is missing. Cannot fetch authorized doctors.");
+    }
+  }, [isLoading, userId]);
 
   const handleAddDoctor = async () => {
     if (!doctorId.trim()) {
@@ -210,7 +214,6 @@ export function DoctorAccessManager() {
                 </TableCell>
                 <TableCell className="hidden md:table-cell">{doctor.specialty}</TableCell>
                 <TableCell className="hidden md:table-cell">{doctor.hospital}</TableCell>
-                <TableCell>{doctor.accessGrantedOn.toLocaleDateString()}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="destructive" size="sm" onClick={() => handleRevokeAccess(doctor.id)}>
                     Revoke

@@ -56,17 +56,41 @@ export function DashboardLayout({ children, userRole = "patient", userName = "Us
   const pathname = usePathname()
   const router = useRouter()
   const { toast } = useToast()
-  const { logout } = useUser()
-
+  const { logout , user } = useUser()
   const handleLogout = () => {
-    logout()
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
+    const response = fetch("http://localhost:6420/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },body: JSON.stringify({
+        userID: user?.id,
+        role: user?.role,
+      }),
     })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Logout failed")
+      }
+      return res.json()
+    })
+    .then(() => {
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      })
+    })
+    .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Logout failed",
+          description: error instanceof Error ? error.message : "There was a problem logging you out",
+        })
+      }
+    )
+    logout()
     router.push("/")
   }
-
+  
   const isActivePath = (path: string) => {
     return pathname === path
   }

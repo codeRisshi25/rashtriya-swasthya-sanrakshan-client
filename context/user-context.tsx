@@ -13,9 +13,10 @@ export interface User {
   address?: string;
   walletAddress?: string;
   privateKey?: string; // NEVER store this in production
+  name?: string;
+  loggedIn?: boolean;
 
   // Doctor-specific properties
-  full_name?: string;
   gender?: string;
   dob?: string;
   license_number?: string;

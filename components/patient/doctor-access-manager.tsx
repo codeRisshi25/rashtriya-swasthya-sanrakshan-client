@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState , useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { useUser } from "@/context/user-context"
 
 interface Doctor {
   id: string
@@ -24,31 +25,44 @@ interface Doctor {
   accessGrantedOn: Date
 }
 
-// Sample doctor data
-const doctors: Doctor[] = [
-  {
-    id: "DOC001",
-    name: "Dr. Rajesh Kumar",
-    specialty: "Cardiology",
-    hospital: "City General Hospital",
-    accessGrantedOn: new Date(2023, 4, 10),
-  },
-  {
-    id: "DOC002",
-    name: "Dr. Priya Sharma",
-    specialty: "Neurology",
-    hospital: "Medical Institute of India",
-    accessGrantedOn: new Date(2023, 5, 15),
-  },
-]
 
 export function DoctorAccessManager() {
   const { toast } = useToast()
-  const [authorizedDoctors, setAuthorizedDoctors] = useState<Doctor[]>(doctors)
+  const [authorizedDoctors, setAuthorizedDoctors] = useState<Doctor[]>([])
   const [doctorId, setDoctorId] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const handleAddDoctor = () => {
+
+  const { user } = useUser()
+  const userWalletAddress = user?.walletAddress;
+  const userId = user?.id;
+
+
+  const fetchAuthorizedDoctors = async () => {
+    try {
+      const response = await fetch(`http://localhost:6420/access/doctors?uid=${userId}`, {
+        method: "GET",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch authorized doctors")
+      }
+      const data = await response.json()
+      setAuthorizedDoctors(data.doctors)
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch authorized doctors",
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchAuthorizedDoctors()
+  }, [])
+
+  const handleAddDoctor = async () => {
     if (!doctorId.trim()) {
       toast({
         variant: "destructive",
@@ -58,33 +72,76 @@ export function DoctorAccessManager() {
       return
     }
 
-    // In a real app, this would verify the doctor ID against a database
-    // For demo purposes, we'll simulate adding a new doctor
-    const newDoctor: Doctor = {
-      id: doctorId,
-      name: "Dr. Amit Patel",
-      specialty: "General Medicine",
-      hospital: "Community Health Center",
-      accessGrantedOn: new Date(),
+    try {
+      // Send request to backend to grant access
+      const response = await fetch("http://localhost:6420/access/grant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: userWalletAddress,
+          doctorId: doctorId,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to grant access")
+      }
+
+      const data = await response.json();
+      const newDoctor: Doctor = data.doctor;
+      
+      // Add the doctor to the list
+      setAuthorizedDoctors([...authorizedDoctors, newDoctor]);
+      setDoctorId("");
+      setIsDialogOpen(false);
+
+      toast({
+        title: "Doctor added",
+        description: `${data.name} now has access to your medical records`,
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to grant access",
+      })
     }
-
-    setAuthorizedDoctors([...authorizedDoctors, newDoctor])
-    setDoctorId("")
-    setIsDialogOpen(false)
-
-    toast({
-      title: "Doctor added",
-      description: `Dr. Amit Patel now has access to your medical records`,
-    })
   }
 
-  const handleRevokeAccess = (doctorId: string) => {
-    setAuthorizedDoctors(authorizedDoctors.filter((doctor) => doctor.id !== doctorId))
+  const handleRevokeAccess = async (doctorId: string) => {
+    try {
+      // Send request to backend to revoke access
+      const response = await fetch("http://localhost:6420/access/revoke", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: userWalletAddress,
+          doctorId: doctorId,
+        }),
+      })
 
-    toast({
-      title: "Access revoked",
-      description: "The doctor no longer has access to your records",
-    })
+      if (!response.ok) {
+        throw new Error("Failed to revoke access")
+      }
+
+      // Remove doctor from the list
+      setAuthorizedDoctors(authorizedDoctors.filter((doctor) => doctor.id !== doctorId))
+
+      toast({
+        title: "Access revoked",
+        description: "The doctor no longer has access to your records",
+      })
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to revoke access",
+      })
+    }
   }
 
   return (

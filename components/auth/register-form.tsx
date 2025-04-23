@@ -95,7 +95,7 @@ export function RegisterForm() {
     
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:4505/send-otp', {
+      const response = await fetch('http://localhost:6420/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:4505/verify-otp', {
+      const response = await fetch('http://localhost:6420/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

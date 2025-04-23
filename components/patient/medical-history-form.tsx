@@ -64,7 +64,7 @@ export function MedicalHistoryForm() {
       emergencyContact: formData.get('emergencyContact')
       };
       
-      const response = await fetch('http://localhost:4505/register_user', {
+      const response = await fetch('http://localhost:6420/register-user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

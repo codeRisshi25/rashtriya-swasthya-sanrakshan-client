@@ -21,7 +21,6 @@ A blockchain-powered healthcare records management system for secure, patient-co
 - JWT Authentication
 - Blockchain integration
 
-## Getting Started
 
 ### Prerequisites
 
@@ -35,3 +34,5 @@ A blockchain-powered healthcare records management system for secure, patient-co
    git clone https://github.com/codeRisshi25/rashtriya-swasthya-sanrakshan.git
    cd rashtriya-swasthya-sanrakshan
 
+## Future Prospects
+- Grant doctor access through QR code

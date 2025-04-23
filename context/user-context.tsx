@@ -11,6 +11,8 @@ export interface User {
   photoUrl?: string;
   contact?: string;
   address?: string;
+  walletAddress?: string;
+  privateKey?: string; // NEVER store this in production
 
   // Doctor-specific properties
   full_name?: string;
@@ -22,8 +24,6 @@ export interface User {
   years_of_experience?: number;
   specialization?: string;
   qualification?: string;
-  blockchain_address?: string;
-  blockchain_private_key?: string; // NEVER store this in production
 
   // Patient-specific properties (optional, can be extended)
   aadharId?: string;

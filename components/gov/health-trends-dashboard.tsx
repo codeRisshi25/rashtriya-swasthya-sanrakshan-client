@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bar,
   BarChart,
@@ -16,9 +15,9 @@ import {
   PieChart,
   Pie,
   Cell,
-} from "recharts"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Sample data for disease prevalence
 const diseaseData = [
@@ -29,7 +28,7 @@ const diseaseData = [
   { name: "Mental Health", count: 580 },
   { name: "Cancer", count: 480 },
   { name: "Others", count: 920 },
-]
+];
 
 // Sample data for monthly trends
 const monthlyTrendsData = [
@@ -45,7 +44,7 @@ const monthlyTrendsData = [
   { month: "Oct", cases: 490, vaccinations: 1300 },
   { month: "Nov", cases: 470, vaccinations: 1400 },
   { month: "Dec", cases: 450, vaccinations: 1500 },
-]
+];
 
 // Sample data for age distribution
 const ageDistributionData = [
@@ -54,10 +53,10 @@ const ageDistributionData = [
   { name: "36-50", value: 30 },
   { name: "51-65", value: 20 },
   { name: "65+", value: 10 },
-]
+];
 
 // Colors for pie chart
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"]
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 export function HealthTrendsDashboard() {
   return (
@@ -139,32 +138,23 @@ export function HealthTrendsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-[350px]">
-                <ChartContainer
-                  config={{
-                    count: {
-                      label: "Cases",
-                      color: "hsl(var(--chart-1))",
-                    },
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={diseaseData}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="count" fill="var(--color-count)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={diseaseData}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -178,38 +168,25 @@ export function HealthTrendsDashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-[350px]">
-                <ChartContainer
-                  config={{
-                    cases: {
-                      label: "New Cases",
-                      color: "hsl(var(--chart-1))",
-                    },
-                    vaccinations: {
-                      label: "Vaccinations",
-                      color: "hsl(var(--chart-2))",
-                    },
-                  }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={monthlyTrendsData}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend />
-                      <Line type="monotone" dataKey="cases" stroke="var(--color-cases)" activeDot={{ r: 8 }} />
-                      <Line type="monotone" dataKey="vaccinations" stroke="var(--color-vaccinations)" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={monthlyTrendsData}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="cases" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="vaccinations" stroke="#82ca9d" />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -248,6 +225,6 @@ export function HealthTrendsDashboard() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 

@@ -126,34 +126,32 @@ export function LoginForm() {
         });
 
         router.push("/doctor/dashboard");
-      } else {
-        // Government official login - Using dummy data for testing
-        // Skip actual API call and use dummy data instead
+      }  else if (userRole === "government") {
+        // Government login logic (bypass authentication)
         console.log("Using dummy government login data");
-        
+  
         // Dummy government official data
         const dummyAdminData = {
           id: "gov123456",
-          userID: userID,
           full_name: "Government Admin",
           department: "Health Ministry",
           designation: "Health Officer",
           email: "admin@health.gov.in",
           phone: "9876543210",
-          role: "government"
+          role: "admin", // Changed from "government" to match User type
         };
-
+  
         // Set user with dummy data
         setUser(dummyAdminData);
-        
+  
         // Store in localStorage for persistence
         localStorage.setItem("user", JSON.stringify(dummyAdminData));
-
+  
         toast({
           title: "Demo Login Successful",
           description: "Welcome to the government dashboard (demo mode)",
         });
-
+  
         router.push("/government/dashboard");
       }
     } catch (error) {

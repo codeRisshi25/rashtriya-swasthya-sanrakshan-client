@@ -33,8 +33,9 @@ export function DoctorAccessManager() {
 
 
   const { user , isLoading} = useUser()
-  const userWalletAddress = user?.walletAddress;
   const userId = user?.id;
+  const privateKey = user?.privateKey;
+
 
 
   const fetchAuthorizedDoctors = async () => {
@@ -72,8 +73,8 @@ export function DoctorAccessManager() {
         variant: "destructive",
         title: "Error",
         description: "Please enter a valid Doctor ID",
-      })
-      return
+      });
+      return;
     }
 
     try {
@@ -84,35 +85,34 @@ export function DoctorAccessManager() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          walletAddress: userWalletAddress,
-          doctorId: doctorId,
+          patientID: userId,
+          privateKey: privateKey,
+          doctorID: doctorId,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to grant access")
+        throw new Error("Failed to grant access");
       }
 
-      const data = await response.json();
-      const newDoctor: Doctor = data.doctor;
-      
-      // Add the doctor to the list
-      setAuthorizedDoctors([...authorizedDoctors, newDoctor]);
+      // Fetch the updated list of authorized doctors
+      await fetchAuthorizedDoctors();
+
       setDoctorId("");
       setIsDialogOpen(false);
 
       toast({
         title: "Doctor added",
-        description: `${data.name} now has access to your medical records`,
-      })
+        description: "The doctor now has access to your medical records",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to grant access",
-      })
+      });
     }
-  }
+  };
 
   const handleRevokeAccess = async (doctorId: string) => {
     try {
@@ -123,30 +123,31 @@ export function DoctorAccessManager() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          walletAddress: userWalletAddress,
-          doctorId: doctorId,
+          patientID: userId,
+          privateKey: privateKey,
+          doctorID: doctorId,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to revoke access")
+        throw new Error("Failed to revoke access");
       }
 
-      // Remove doctor from the list
-      setAuthorizedDoctors(authorizedDoctors.filter((doctor) => doctor.id !== doctorId))
+      // Fetch the updated list of authorized doctors
+      await fetchAuthorizedDoctors();
 
       toast({
         title: "Access revoked",
         description: "The doctor no longer has access to your records",
-      })
+      });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to revoke access",
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -201,8 +202,7 @@ export function DoctorAccessManager() {
               <TableHead>Doctor</TableHead>
               <TableHead className="hidden md:table-cell">Specialty</TableHead>
               <TableHead className="hidden md:table-cell">Hospital</TableHead>
-              <TableHead>Access Since</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="hidden md:table-cell">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

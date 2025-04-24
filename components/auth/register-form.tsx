@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -42,6 +42,25 @@ export function RegisterForm() {
     address: "",
     photoUrl: "",
   })
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(true);
+
+  const handleAcceptTerms = () => {
+    localStorage.setItem("termsAccepted", "true"); // Store acceptance in localStorage
+    setIsTermsModalOpen(false); // Close the modal
+    toast({
+      title: "Terms Accepted",
+      description: "Thank you for accepting the terms and conditions.",
+    });
+  };
+
+  const handleDenyTerms = () => {
+    toast({
+      variant: "destructive",
+      title: "Terms Denied",
+      description: "You must accept the terms and conditions to proceed.",
+    });
+    router.push("/"); // Redirect to root
+  };
 
   const validateAadhaar = (value: string) => {
     // Remove spaces for validation
@@ -92,7 +111,7 @@ export function RegisterForm() {
     if (!validateAadhaar(aadhaarId) || !validatePassword()) {
       return
     }
-    
+
     setIsLoading(true)
     try {
       const response = await fetch('http://localhost:6420/send-otp', {
@@ -105,15 +124,15 @@ export function RegisterForm() {
           password: password
         }),
       });
-      
+
       const data = await response.json(); //sends back the reference id
       setReferenceId(data.reference_id);
-      
-      
+
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to send OTP');
       }
-      
+
       setStep("otp")
       toast({
         title: "OTP Sent",
@@ -145,9 +164,9 @@ export function RegisterForm() {
           otp: otp
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to verify OTP');
       }
@@ -156,19 +175,19 @@ export function RegisterForm() {
       if (data.photo && data.photo.trim() !== "") {
         // Clean any quotes from the photo string
         const cleanPhotoUrl = data.photo.replace(/"/g, '');
-        
+
         if (cleanPhotoUrl && cleanPhotoUrl.trim() !== "") {
           // Check if it's already a data URL or http URL
-          const photoUrl = cleanPhotoUrl.startsWith('data:') || cleanPhotoUrl.startsWith('http') 
-        ? cleanPhotoUrl 
-        : `data:image/jpeg;base64,${cleanPhotoUrl}`;
-        
+          const photoUrl = cleanPhotoUrl.startsWith('data:') || cleanPhotoUrl.startsWith('http')
+            ? cleanPhotoUrl
+            : `data:image/jpeg;base64,${cleanPhotoUrl}`;
+
           setVerifyData({
-        name: data.name,
-        gender: data.gender,
-        dob: data.dob,
-        address: data.address,
-        photoUrl: photoUrl,
+            name: data.name,
+            gender: data.gender,
+            dob: data.dob,
+            address: data.address,
+            photoUrl: photoUrl,
           });
         }
       } else {
@@ -183,10 +202,10 @@ export function RegisterForm() {
       // Show verification dialog with user data from response
       setStep("verification");
       setIsVerificationDialogOpen(true);
-      
+
       // Here you would handle the user data returned from the API
       // For example: setUserData(data.userData);
-      
+
     } catch (error) {
       toast({
         variant: "destructive",
@@ -289,41 +308,41 @@ export function RegisterForm() {
             <div className="space-y-2">
               <Label htmlFor="otp">Enter OTP</Label>
               <div className="flex gap-2 justify-between">
-          {[...Array(6)].map((_, index) => (
-            <Input
-              key={index}
-              type="text"
-              maxLength={1}
-              value={otp[index] || ''}
-              onChange={(e) => {
-                const newOtp = otp.split('');
-                newOtp[index] = e.target.value;
-                setOtp(newOtp.join(''));
-                
-                // Auto-focus next input
-                if (e.target.value && index < 5) {
-            const nextInput = e.target.parentElement?.querySelector(
-              `input:nth-child(${index + 2})`
-            ) as HTMLInputElement;
-            if (nextInput) nextInput.focus();
-                }
-              }}
-              onKeyDown={(e) => {
-                // Handle backspace
-                if (e.key === 'Backspace' && !otp[index] && index > 0) {
-            const prevInput = e.currentTarget.parentElement?.querySelector(
-              `input:nth-child(${index})`
-            ) as HTMLInputElement;
-            if (prevInput) prevInput.focus();
-                }
-              }}
-              className="w-12 h-12 text-center text-lg border-blue-200 focus-visible:ring-primary"
-            />
-          ))}
+                {[...Array(6)].map((_, index) => (
+                  <Input
+                    key={index}
+                    type="text"
+                    maxLength={1}
+                    value={otp[index] || ''}
+                    onChange={(e) => {
+                      const newOtp = otp.split('');
+                      newOtp[index] = e.target.value;
+                      setOtp(newOtp.join(''));
+
+                      // Auto-focus next input
+                      if (e.target.value && index < 5) {
+                        const nextInput = e.target.parentElement?.querySelector(
+                          `input:nth-child(${index + 2})`
+                        ) as HTMLInputElement;
+                        if (nextInput) nextInput.focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Handle backspace
+                      if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                        const prevInput = e.currentTarget.parentElement?.querySelector(
+                          `input:nth-child(${index})`
+                        ) as HTMLInputElement;
+                        if (prevInput) prevInput.focus();
+                      }
+                    }}
+                    className="w-12 h-12 text-center text-lg border-blue-200 focus-visible:ring-primary"
+                  />
+                ))}
               </div>
               <p className="text-sm text-gray-500 flex items-center gap-1">
-          <Info className="h-4 w-4" />
-          OTP sent to the mobile number linked with your Aadhaar
+                <Info className="h-4 w-4" />
+                OTP sent to the mobile number linked with your Aadhaar
               </p>
             </div>
             <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
@@ -350,23 +369,23 @@ export function RegisterForm() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="flex items-start gap-4">
-              <div className="h-20 w-20 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
-                {verifyData.photoUrl ? (
-                <img
-                  src={verifyData.photoUrl}
-                  alt="Aadhaar Photo"
-                  className="h-full w-full object-cover"
-                />
-                ) : (
-                <div className="text-blue-500 text-xs text-center">No photo available</div>
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">{verifyData.name}</h3>
-                <p className="text-sm text-gray-500">DOB: {verifyData.dob}</p>
-                <p className="text-sm text-gray-500">Gender: {verifyData.gender}</p>
-                <p className="text-sm text-gray-500 mt-1">{verifyData.address}</p>
-              </div>
+                <div className="h-20 w-20 rounded-md bg-blue-100 flex items-center justify-center overflow-hidden">
+                  {verifyData.photoUrl ? (
+                    <img
+                      src={verifyData.photoUrl}
+                      alt="Aadhaar Photo"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="text-blue-500 text-xs text-center">No photo available</div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-medium">{verifyData.name}</h3>
+                  <p className="text-sm text-gray-500">DOB: {verifyData.dob}</p>
+                  <p className="text-sm text-gray-500">Gender: {verifyData.gender}</p>
+                  <p className="text-sm text-gray-500 mt-1">{verifyData.address}</p>
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -393,7 +412,49 @@ export function RegisterForm() {
           </Link>
         </div>
       </CardFooter>
+
+      {/* Terms and Conditions Modal */}
+      <Dialog open={isTermsModalOpen} onOpenChange={setIsTermsModalOpen}>
+        <DialogContent className="sm:max-w-lg" aria-describedby="terms-description">
+          <DialogHeader>
+            <DialogTitle>Terms and Conditions</DialogTitle>
+          </DialogHeader>
+          <div id="terms-description" className="space-y-4">
+            <p>
+              By using our platform, you agree to the following terms and conditions:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                Your Aadhaar card is used solely for identity verification purposes. We do not store or share your Aadhaar details with third parties.
+              </li>
+              <li>
+                Your personal data will not be sold or used for marketing purposes. It is securely stored and used only for providing our services.
+              </li>
+              <li>
+                A wallet address will be created for you on the Ethereum network as part of our blockchain-based project.
+              </li>
+              <li>
+                Our platform uses blockchain technology to ensure the security and transparency of your medical records.
+              </li>
+              <li>
+                By accepting these terms, you consent to the use of your data as described above.
+              </li>
+            </ul>
+            <p>
+              If you do not agree to these terms, you will not be able to use our platform.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDenyTerms}>
+              Deny
+            </Button>
+            <Button onClick={handleAcceptTerms}>Accept</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </Card>
+
   )
 }
 

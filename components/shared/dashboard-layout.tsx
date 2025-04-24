@@ -63,7 +63,7 @@ export function DashboardLayout({ children, userRole = "patient", userName = "Us
       headers: {
         "Content-Type": "application/json",
       },body: JSON.stringify({
-        userID: user?.id,
+        userID: user?.id || user?.userId,
         role: user?.role,
       }),
     })

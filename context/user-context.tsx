@@ -15,8 +15,10 @@ export interface User {
   privateKey?: string; // NEVER store this in production
   name?: string;
   loggedIn?: boolean;
+  sharedWith?: number;
 
   // Doctor-specific properties
+  userId?: string,
   gender?: string;
   dob?: string;
   license_number?: string;

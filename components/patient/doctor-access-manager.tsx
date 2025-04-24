@@ -67,6 +67,10 @@ export function DoctorAccessManager() {
     }
   }, [isLoading, userId]);
 
+  useEffect(() => {
+    localStorage.setItem("authorizedDoctorsCount", authorizedDoctors.length.toString());
+  }, [authorizedDoctors]);
+
   const handleAddDoctor = async () => {
     if (!doctorId.trim()) {
       toast({

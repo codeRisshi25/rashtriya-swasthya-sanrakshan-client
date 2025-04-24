@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, File, Calendar, User, FileUp } from "lucide-react"
 import { useUser } from "@/context/user-context"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect , useState} from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function PatientDashboard() {
   const { user, isLoading } = useUser()
   const router = useRouter()
   console.log("User:", user)
+  const [authorizedDoctorsCount, setAuthorizedDoctorsCount] = useState<number>(0);
+
   
   // Redirect if not logged in or not a patient
   useEffect(() => {
@@ -23,6 +25,12 @@ export default function PatientDashboard() {
       router.push('/login')
     }
   }, [user, isLoading, router])
+
+  useEffect(() => {
+    const count = localStorage.getItem("authorizedDoctorsCount");
+    setAuthorizedDoctorsCount(count ? parseInt(count, 10) : 0);
+  }, []);
+
 
   // Show loading state
   if (isLoading) {
@@ -111,7 +119,7 @@ export default function PatientDashboard() {
                 <CardDescription>Doctors with access</CardDescription>
               </CardHeader>
               <CardContent className="pb-2">
-                <div className="text-3xl font-bold">{patientData.sharedWith}</div>
+                <div className="text-3xl font-bold">{authorizedDoctorsCount}</div>
                 <p className="text-xs text-muted-foreground">Last changed {patientData.lastShared}</p>
               </CardContent>
               <CardContent className="flex items-center justify-center pt-0">

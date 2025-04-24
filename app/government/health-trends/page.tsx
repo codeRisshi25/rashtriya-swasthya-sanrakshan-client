@@ -1,3 +1,5 @@
+'use client'
+
 import { DashboardLayout } from "@/components/shared/dashboard-layout"
 import { HealthTrendsDashboard } from "@/components/gov/health-trends-dashboard"
 

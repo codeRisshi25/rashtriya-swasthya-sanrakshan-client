@@ -90,12 +90,12 @@ export function LoginForm() {
         const response = await fetch('http://localhost:6420/auth/login', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userID,
-            password,
-            role: 'doctors', // The backend expects 'doctors' for the doctor role
+        userID,
+        password,
+        role: 'doctors', // The backend expects 'doctors' for the doctor role
           }),
         });
 
@@ -127,42 +127,31 @@ export function LoginForm() {
 
         router.push("/doctor/dashboard");
       } else {
-        // Government official login
-        // Make API call to authentication endpoint for government official
-        const response = await fetch('http://localhost:6420/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userID,
-            password,
-            role: 'government', // The backend expects 'government' for admin role
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Login failed');
-        }
-
-        const userData = await response.json();
-        console.log("Government official data from API:", userData);
+        // Government official login - Using dummy data for testing
+        // Skip actual API call and use dummy data instead
+        console.log("Using dummy government login data");
         
-        // Map API response to our User interface structure
-        const adminData = {
-          ...userData.data,
-          role: "admin", // Map to 'admin' role in our app
+        // Dummy government official data
+        const dummyAdminData = {
+          id: "gov123456",
+          userID: userID,
+          full_name: "Government Admin",
+          department: "Health Ministry",
+          designation: "Health Officer",
+          email: "admin@health.gov.in",
+          phone: "9876543210",
+          role: "government"
         };
 
-        // Set user with the data from API
-        setUser(adminData);
+        // Set user with dummy data
+        setUser(dummyAdminData);
         
         // Store in localStorage for persistence
-        localStorage.setItem("user", JSON.stringify(adminData));
+        localStorage.setItem("user", JSON.stringify(dummyAdminData));
 
         toast({
-          title: "Login successful",
-          description: "Welcome back to Rashtriya Swasthya Sanrakshan",
+          title: "Demo Login Successful",
+          description: "Welcome to the government dashboard (demo mode)",
         });
 
         router.push("/government/dashboard");

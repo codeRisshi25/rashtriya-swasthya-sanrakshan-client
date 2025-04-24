@@ -1,58 +1,78 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { FileText, PlusCircle, Search, User } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { FileText, PlusCircle, Search } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useUser } from "@/context/user-context";
 
 interface Patient {
-  id: string
-  name: string
-  age: number
-  gender: string
-  lastVisit: Date | null
-  condition?: string
+  userId: string;
+  name: string;
+  age: number;
+  gender: string;
 }
 
-// Sample patients data
-const patients: Patient[] = [
-  {
-    id: "PAT001",
-    name: "Rahul Sharma",
-    age: 45,
-    gender: "Male",
-    lastVisit: new Date(2023, 5, 15),
-    condition: "Hypertension",
-  },
-  {
-    id: "PAT002",
-    name: "Priya Patel",
-    age: 35,
-    gender: "Female",
-    lastVisit: new Date(2023, 5, 10),
-    condition: "Diabetes Type 2",
-  },
-  {
-    id: "PAT003",
-    name: "Amit Kumar",
-    age: 28,
-    gender: "Male",
-    lastVisit: new Date(2023, 4, 20),
-    condition: "Asthma",
-  },
-  {
-    id: "PAT004",
-    name: "Sunita Singh",
-    age: 52,
-    gender: "Female",
-    lastVisit: null,
-  },
-]
-
 export function PatientList() {
+  const { toast } = useToast();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: userLoading } = useUser();
+  const userId = user?.userId;
+  // Fetch patients from API and store in localStorage
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const doctorId = userId; // Assuming doctor ID is stored in localStorage
+        if (!doctorId) {
+          throw new Error("Doctor ID is missing");
+        }
+        const response = await fetch(`http://localhost:6420/doctors/access/patients/${doctorId}`, {
+          method: "GET",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch patients");
+        }
+
+        const data = await response.json();
+        const filteredPatients = data.patients.map((patient: any) => ({
+          id: patient.id,
+          name: patient.name,
+          age: patient.age,
+          gender: patient.gender,
+        }));
+
+        setPatients(filteredPatients);
+        localStorage.setItem("patients", JSON.stringify(filteredPatients));
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to fetch patients",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const storedPatients = localStorage.getItem("patients");
+    if (storedPatients) {
+      setPatients(JSON.parse(storedPatients));
+      setIsLoading(false);
+    } else {
+      fetchPatients();
+    }
+  }, [toast]);
+
+  if (isLoading) {
+    return <p>Loading patients...</p>;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -80,7 +100,6 @@ export function PatientList() {
               <TableHead>Name</TableHead>
               <TableHead className="hidden md:table-cell">Age</TableHead>
               <TableHead className="hidden md:table-cell">Gender</TableHead>
-              <TableHead>Last Visit</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -88,40 +107,16 @@ export function PatientList() {
             {patients.map((patient) => (
               <TableRow key={patient.id}>
                 <TableCell className="font-medium">{patient.id}</TableCell>
-                <TableCell>
-                  {patient.name}
-                  {patient.condition && (
-                    <div className="md:hidden">
-                      <Badge variant="outline" className="mt-1">
-                        {patient.condition}
-                      </Badge>
-                    </div>
-                  )}
-                </TableCell>
+                <TableCell>{patient.name}</TableCell>
                 <TableCell className="hidden md:table-cell">{patient.age}</TableCell>
                 <TableCell className="hidden md:table-cell">{patient.gender}</TableCell>
-                <TableCell>
-                  {patient.lastVisit ? (
-                    patient.lastVisit.toLocaleDateString()
-                  ) : (
-                    <span className="text-muted-foreground">No visits yet</span>
-                  )}
-                </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/doctor/patients/${patient.id}`}>
-                        <User className="h-4 w-4 mr-1" />
-                        View
-                      </Link>
-                    </Button>
-                    <Button variant="default" size="sm" asChild>
-                      <Link href={`/doctor/add-record?patientId=${patient.id}`}>
-                        <FileText className="h-4 w-4 mr-1" />
-                        Add Record
-                      </Link>
-                    </Button>
-                  </div>
+                  <Button variant="default" size="sm" asChild>
+                    <Link href={`/doctor/add-record?patientId=${patient.id}`}>
+                      <FileText className="h-4 w-4 mr-1" />
+                      Add Record
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -129,6 +124,5 @@ export function PatientList() {
         </Table>
       </CardContent>
     </Card>
-  )
+  );
 }
-

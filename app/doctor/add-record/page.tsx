@@ -1,3 +1,5 @@
+'use client'
+
 import { DashboardLayout } from "@/components/shared/dashboard-layout"
 import { AddMedicalRecordForm } from "@/components/doctor/add-medical-record-form"
 

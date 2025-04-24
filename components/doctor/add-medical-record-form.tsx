@@ -88,17 +88,6 @@ export function AddMedicalRecordForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="visitDate">Date of Visit</Label>
-            <Input
-              id="visitDate"
-              name="visitDate"
-              type="date"
-              required
-              defaultValue={new Date().toISOString().split("T")[0]}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="diagnosis">Diagnosis</Label>
             <Input id="diagnosis" name="diagnosis" placeholder="Enter primary diagnosis" required />
           </div>
@@ -129,11 +118,6 @@ export function AddMedicalRecordForm() {
               </div>
             )}
             <input type="hidden" name="medications" value={JSON.stringify(medications)} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">Clinical Notes</Label>
-            <Textarea id="notes" name="notes" placeholder="Enter detailed clinical notes and observations" rows={5} />
           </div>
 
           <div className="space-y-2">

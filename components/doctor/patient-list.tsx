@@ -18,20 +18,21 @@ interface Patient {
 }
 
 export function PatientList() {
+
   const { toast } = useToast();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user, isLoading: userLoading } = useUser();
   const userId = user?.userId;
-  // Fetch patients from API and store in localStorage
+
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        const doctorId = userId; // Assuming doctor ID is stored in localStorage
-        if (!doctorId) {
+        if (!userId) {
           throw new Error("Doctor ID is missing");
         }
-        const response = await fetch(`http://localhost:6420/doctors/access/patients/${doctorId}`, {
+
+        const response = await fetch(`http://localhost:6420/doctors/access/patients/${userId}`, {
           method: "GET",
         });
 
@@ -40,6 +41,8 @@ export function PatientList() {
         }
 
         const data = await response.json();
+        console.log("API Response:", data);
+
         const filteredPatients = data.patients.map((patient: any) => ({
           id: patient.id,
           name: patient.name,
@@ -60,18 +63,27 @@ export function PatientList() {
       }
     };
 
-    const storedPatients = localStorage.getItem("patients");
-    if (storedPatients) {
-      setPatients(JSON.parse(storedPatients));
-      setIsLoading(false);
-    } else {
+    if (!userLoading && userId) {
       fetchPatients();
     }
-  }, [toast]);
+  }, [userId, userLoading, toast]);
 
-  if (isLoading) {
+  if (userLoading || isLoading) {
     return <p>Loading patients...</p>;
   }
+
+  if (!userId) {
+    return (
+      <p className="text-red-500">
+        Doctor ID is missing. Please log in again.
+      </p>
+    );
+  }
+
+  if (patients.length === 0) {
+    return <p>No patients found.</p>;
+  }
+
 
   return (
     <Card>
